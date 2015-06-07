@@ -9,12 +9,15 @@ helpers do
 end
 
 before do
-  if File.exist?(json_filename)
-    open(json_filename) {|f|
-      @json = JSON.parse(f.read)
-    }
-  else
-    @json = {}
+  @json = {}
+  begin
+    if File.exist?(json_filename)
+      open(json_filename) {|f|
+        @json = JSON.parse(f.read)
+      }
+    end
+  rescue => e
+    p e
   end
 end
 
@@ -26,7 +29,9 @@ get '/' do
 end
 
 after do
-  open(json_filename, 'w') {|f|
-    f.write(@json.to_json)
-  }
+  if @json
+    open(json_filename, 'w') {|f|
+      f.write(@json.to_json)
+    }
+  end
 end
