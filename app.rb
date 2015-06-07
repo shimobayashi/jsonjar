@@ -1,37 +1,18 @@
 require 'sinatra'
-require 'json'
+require 'mongoid'
 
-helpers do
-  def json_filename
-    base_dir = File.expand_path(File.dirname(__FILE__))
-    base_dir + '/jsonjar.json'
-  end
-end
+require_relative 'models/jar'
 
-before do
-  @json = {}
-  begin
-    if File.exist?(json_filename)
-      open(json_filename) {|f|
-        @json = JSON.parse(f.read)
-      }
-    end
-  rescue => e
-    p e
-  end
-end
+Mongoid.load!('config/mongoid.yml')
 
 get '/' do
-  params.each {|k, v|
-    @json[k] = v
-  }
-  @json.to_json
-end
+  @jar = Jar.latest || Jar.new
 
-after do
-  if @json
-    open(json_filename, 'w') {|f|
-      f.write(@json.to_json)
-    }
-  end
+  params.each {|k, v|
+    @jar.data[k] = v
+  }
+
+  halt 503, "failed to save jar: #{jar.errors.full_messages.join(',')}" unless @jar.save
+
+  @jar.to_json
 end
