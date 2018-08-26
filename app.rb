@@ -9,7 +9,9 @@ get '/' do
   @jar = Jar.latest || Jar.new
 
   params.each {|k, v|
-    @jar.data[k] = v
+    value = v
+    value = Time.now.to_i if value == '%TIMES'
+    @jar.data[k] = value
   }
 
   halt 503, "failed to save jar: #{jar.errors.full_messages.join(',')}" unless @jar.save
