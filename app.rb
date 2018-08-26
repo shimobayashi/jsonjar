@@ -10,7 +10,7 @@ get '/' do
 
   params.each {|k, v|
     value = v
-    value = Time.now.to_i if value == '%TIMES'
+    value = Time.now.to_i.to_s if value == '%TIMES' # Taskerと同じ書き方でUNIXTIMEを挿入できる
     @jar.data[k] = value
   }
 
